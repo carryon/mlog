@@ -17,6 +17,7 @@ type FileWriter struct {
 	level        Level
 	filepath     string
 	fd           *os.File
+	name         string
 	url          string
 	slack        SlackMsg
 	hourlyTicker *hourlyTicker
@@ -33,6 +34,7 @@ type SlackMsg struct {
 func NewFileWriter(filepath, name, url, channel string) *FileWriter {
 	return &FileWriter{
 		filepath:     filepath,
+		name:         name,
 		url:          url,
 		slack:        SlackMsg{Username: name, Channel: channel},
 		hourlyTicker: newHourlyTicker(),
@@ -50,8 +52,8 @@ func (fw *FileWriter) Init() error {
 	if err := os.MkdirAll(fw.filepath, 0755); err != nil {
 		panic(err)
 	}
-	logFile := fmt.Sprintf("text_%s.log", time.Now().Format("2006-01-02_15"))
-	linkFile := filepath.Join(fw.filepath, "text.log")
+	logFile := fmt.Sprintf("%s_%s.log", fw.name, time.Now().Format("2006-01-02_15"))
+	linkFile := filepath.Join(fw.filepath, fw.name+".log")
 
 	_, err := os.Lstat(linkFile)
 	if err == nil || os.IsExist(err) {
@@ -102,7 +104,7 @@ func (fw *FileWriter) postToSlack(errMsg string) error {
 	return err
 }
 
-// Write writes message to the console.
+// Write writes message to the file and to the slack.
 func (fw *FileWriter) Write(msg string, level Level) error {
 	if level >= LevelError {
 		err := fw.postToSlack(msg)
@@ -112,10 +114,6 @@ func (fw *FileWriter) Write(msg string, level Level) error {
 	fw.checkFile()
 	_, err := fmt.Fprint(fw.fd, msg)
 	return err
-}
-
-func (fw *FileWriter) WriteToSlack(msg string, level Level) error {
-	return nil
 }
 
 // Flush flushes.
