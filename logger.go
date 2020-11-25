@@ -317,6 +317,8 @@ func (logger *Logger) Fatal(v ...interface{}) {
 	os.Exit(1)
 }
 
+const levelLength = 8
+
 func (logger *Logger) genMsg(level Level, log string) {
 	if atomic.LoadInt32(&logger.isRunning) == 0 {
 		return
@@ -324,8 +326,12 @@ func (logger *Logger) genMsg(level Level, log string) {
 	buf := logger.bufPool.Get()
 	defer logger.bufPool.Release(buf)
 
-	buf.Write(levelBytes[level])
-	buf.WriteString(" ")
+	n, _ := buf.Write(levelBytes[level])
+	for n < levelLength {
+		buf.WriteString(" ")
+		n++
+	}
+
 	buf.WriteString(time.Now().Format("2006-01-02 15:04:05.000"))
 	if logger.showLocation {
 		buf.WriteString(" ")
