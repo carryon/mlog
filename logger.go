@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const levelLength = 7
+
 type message struct {
 	content string
 	level   Level
@@ -316,8 +318,6 @@ func (logger *Logger) Fatal(v ...interface{}) {
 	logger.Stop()
 	os.Exit(1)
 }
-
-const levelLength = 7
 
 func (logger *Logger) genMsg(level Level, log string) {
 	if atomic.LoadInt32(&logger.isRunning) == 0 {
