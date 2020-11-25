@@ -172,7 +172,6 @@ func (logger *Logger) write(msg *message) {
 		}(writer)
 	}
 	wg.Wait()
-
 }
 
 func (logger *Logger) flushWriters() {
@@ -336,10 +335,7 @@ func (logger *Logger) genMsg(level Level, log string) {
 	buf.WriteString(log)
 	buf.WriteString("\n")
 
-	select {
-	case logger.msg <- &message{buf.String(), level}:
-		// default:
-	}
+	logger.msg <- &message{buf.String(), level}
 
 	if logger.syncWrite {
 		logger.Flush()
