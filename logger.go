@@ -317,7 +317,7 @@ func (logger *Logger) Fatal(v ...interface{}) {
 	os.Exit(1)
 }
 
-const levelLength = 8
+const levelLength = 7
 
 func (logger *Logger) genMsg(level Level, log string) {
 	if atomic.LoadInt32(&logger.isRunning) == 0 {
